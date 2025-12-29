@@ -1,8 +1,28 @@
-import { Box, Image, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, Image, Text, VStack } from "@chakra-ui/react";
 import { useState } from "react";
+import { useCarrinho } from "../Contexts/CarrinhoContext";
 
-export function MenuItemCard({ image, price }) {
+export function MenuItemCard({ id, nome, image, preco, descricao }) {
   const [isFlipped, setIsFlipped] = useState(false);
+  const { adicionarItem } = useCarrinho();
+
+  const precoNumerico = typeof preco === "string" 
+    ? parseFloat(preco.replace("R$", "").replace(",", ".").trim())
+    : preco;
+
+  const precoFormatado = precoNumerico 
+    ? `R$ ${precoNumerico.toFixed(2).replace(".", ",")}` 
+    : "Preço não disponível";
+
+  const handleAdicionarCarrinho = (e) => {
+    e.stopPropagation();
+    adicionarItem({ 
+      id, 
+      nome, 
+      preco: precoNumerico,
+      image 
+    });
+  };
 
   return (
     <Box
@@ -33,12 +53,12 @@ export function MenuItemCard({ image, price }) {
         >
           <Image
             src={image}
-            alt="Item do cardápio"
+            alt={nome}
             w="100%"
             h="100%"
             objectFit="cover"
           />
-          
+
           <Box
             position="absolute"
             bottom={0}
@@ -74,16 +94,26 @@ export function MenuItemCard({ image, price }) {
         >
           <VStack spacing={3}>
             <Text fontSize="lg" fontWeight="bold">
-              Doce Especial
+              {nome || "Produto"}
             </Text>
 
             <Text fontSize="sm" opacity={0.9}>
-              Massa fofinha, recheio cremoso e cobertura artesanal.
+              {descricao || "Delicioso produto artesanal"}
             </Text>
 
             <Text fontSize="xl" fontWeight="bold">
-              {price}
+              {precoFormatado}
             </Text>
+
+            <Button
+              colorScheme="whiteAlpha"
+              size="sm"
+              onClick={handleAdicionarCarrinho}
+              _hover={{ bg: "whiteAlpha.300" }}
+              isDisabled={!precoNumerico}
+            >
+              Adicionar ao Carrinho
+            </Button>
           </VStack>
         </Box>
       </Box>
